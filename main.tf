@@ -81,7 +81,7 @@ resource "google_cloud_scheduler_job" "start_preemtive_vm" {
   name        = "start-preemptive-vm"
   description = "Start any preemptive vms in case any have gone down"
   schedule    = "*/5 * * * *"
-  region      = coalesce(var.scheduler_region, var.default_region)
+  region      = coalesce(var.app_region, var.default_region)
 
   pubsub_target {
     # topic.id is the topic's full resource name.
@@ -97,7 +97,7 @@ resource "google_cloudfunctions_function" "start_vm" {
   name        = "start-vm-event"
   description = "Starts vms with the given tag and region"
   runtime     = "nodejs8"
-  region      = coalesce(var.app_region, var.default_region)
+  region      = coalesce(var.function_region, var.default_region)
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name

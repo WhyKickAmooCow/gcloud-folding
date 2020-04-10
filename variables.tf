@@ -8,9 +8,10 @@ variable "app_region" {
   default = ""
 }
 
-variable "scheduler_region" {
+variable "function_region" {
   default = ""
 }
+
 
 variable "default_zone" {}
 
