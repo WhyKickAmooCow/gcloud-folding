@@ -1,4 +1,5 @@
 credentials.json
+output/*
 
 # Local .terraform directories
 **/.terraform/*

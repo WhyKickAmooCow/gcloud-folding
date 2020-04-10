@@ -4,22 +4,18 @@ variable "credentials_file" {}
 
 variable "default_region" {}
 
-variable "compute_region" {
-  default = default_region
-}
-
 variable "function_region" {
-  default = default_region
+  default = ""
 }
 
 variable "scheduler_region" {
-  default = default_region
+  default = ""
 }
 
 variable "default_zone" {}
 
 variable "compute_zone" {
-  default = default_zone
+  default = ""
 }
 
 variable "machine_type" {

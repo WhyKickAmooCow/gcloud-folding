@@ -14,8 +14,7 @@ provider "google" {
 resource "google_compute_instance" "folding" {
   name         = var.instance_name
   machine_type = var.machine_type
-  region       = var.compute_region
-  zone         = var.compute_zone
+  zone         = coalesce(var.compute_zone, var.default_zone)
 
   scheduling {
     preemptible         = false
@@ -45,7 +44,7 @@ resource "google_compute_instance" "folding" {
   }
 
   network_interface {
-    network = "default"
+    network = google_compute_network.vpc_network.name
     access_config {
       // Ephemeral IP
     }
@@ -54,7 +53,7 @@ resource "google_compute_instance" "folding" {
 
 resource "google_compute_firewall" "folding_access" {
   name    = "folding-remote-access"
-  network = google_compute_network.default.name
+  network = google_compute_network.vpc_network.name
 
   allow {
     protocol = "icmp"
@@ -80,13 +79,13 @@ resource "google_cloud_scheduler_job" "start_preemtive_vm" {
   name        = "start-preemptive-vm"
   description = "Start any preemptive vms in case any have gone down"
   schedule    = "*/5 * * * *"
-  region      = var.scheduler_region
+  region      = coalesce(var.scheduler_region, var.default_region)
 
   pubsub_target {
     # topic.id is the topic's full resource name.
     topic_name = google_pubsub_topic.start_vm.id
     data = base64encode(jsonencode({
-      zone  = var.zone
+      zone  = coalesce(var.compute_zone, var.default_zone)
       label = "type=preempt"
     }))
   }
@@ -96,7 +95,7 @@ resource "google_cloudfunctions_function" "start_vm" {
   name        = "start-vm-event"
   description = "Starts vms with the given tag and region"
   runtime     = "nodejs8"
-  region      = var.function_region
+  region      = coalesce(var.function_region, var.default_region)
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -117,7 +116,13 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "start_vm_function_archive" {
   name   = "start_vm_function.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "./start-vm-function.zip"
+  source = data.archive_file.start_vm_function_source.output_path
+}
+
+data "archive_file" "start_vm_function_source" {
+  type        = "zip"
+  source_dir  = "./resources/start-vm-function"
+  output_path = "./output/start_vm_function.zip"
 }
 
 resource "google_pubsub_topic" "start_vm" {
