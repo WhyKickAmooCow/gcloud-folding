@@ -63,14 +63,24 @@ resource "google_compute_firewall" "folding_access" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "36331"]
+    ports    = ["80", "443", "36331", "0-65535"]
   }
 
   source_tags = ["folding"]
 }
 
+resource "google_compute_firewall" "ssh_access" {
+  name = "folding-allow-ssh"
+  network = google_compute_network.vpc_network.name
+
+  allow {
+    protocol = "tcp"
+    ports = ["22"]
+  }
+}
+
 resource "google_compute_network" "vpc_network" {
-  name = "vpc-network"
+  name = "folding"
 }
 
 
