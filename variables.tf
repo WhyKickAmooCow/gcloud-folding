@@ -23,3 +23,5 @@ variable "shutdown_script_file" {
 }
 
 variable "initial_image" {}
+
+variable "instance_name" {}
