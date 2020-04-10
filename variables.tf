@@ -4,7 +4,7 @@ variable "credentials_file" {}
 
 variable "default_region" {}
 
-variable "function_region" {
+variable "app_region" {
   default = ""
 }
 

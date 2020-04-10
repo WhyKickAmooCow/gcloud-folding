@@ -16,8 +16,10 @@ resource "google_compute_instance" "folding" {
   machine_type = var.machine_type
   zone         = coalesce(var.compute_zone, var.default_zone)
 
+  tags = ["folding"]
+
   scheduling {
-    preemptible         = false
+    preemptible         = true
     automatic_restart   = false
     on_host_maintenance = "TERMINATE"
   }
@@ -95,7 +97,7 @@ resource "google_cloudfunctions_function" "start_vm" {
   name        = "start-vm-event"
   description = "Starts vms with the given tag and region"
   runtime     = "nodejs8"
-  region      = coalesce(var.function_region, var.default_region)
+  region      = coalesce(var.app_region, var.default_region)
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
