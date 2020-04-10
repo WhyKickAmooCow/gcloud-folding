@@ -1,0 +1,5 @@
+credentials_file = "./credentials.json"
+region = "us-west1"
+zone = "us-west1-b"
+initial_image = "ubuntu-1804-bionic-v20200317"
+fah_version = "v7.5/fahclient_7.5.1"
