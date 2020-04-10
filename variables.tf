@@ -6,6 +6,14 @@ variable "region" {}
 
 variable "zone" {}
 
+variable "machine_type" {
+  default = "n1-highcpu-2"
+}
+
+variable "gpu_type" {}
+
+variable "gpu_count" {}
+
 variable "startup_script_file" {
   default = "./startup.sh"
 }
@@ -14,10 +22,4 @@ variable "shutdown_script_file" {
   default = "./shutdown.sh"
 }
 
-variable "provision_script_file" {
-    default = "./provision.sh"
-}
-
 variable "initial_image" {}
-
-variable "fah_version" {}

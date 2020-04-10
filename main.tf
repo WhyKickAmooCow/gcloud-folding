@@ -11,7 +11,18 @@ provider "google" {
 
 resource "google_compute_instance" "default" {
   name         = "instance-5"
-  machine_type = "n1-standard-1"
+  machine_type = var.machine_type
+
+  scheduling {
+    preemptible = false
+    automatic_restart = false
+    on_host_maintenance = "terminate"
+  }
+
+  guest_accelerator {
+    type = var.gpu_type
+    count = var.gpu_count
+  }
 
   labels = {
       type = "preempt"
@@ -21,7 +32,6 @@ resource "google_compute_instance" "default" {
     startup-script = file(var.startup_script_file)
     shutdown-script = file(var.shutdown_script_file)
     user-data = file("cloud-init.yml")
-    fah-version = "fahclient_7.4.4"
   }
 
   boot_disk {
@@ -31,17 +41,9 @@ resource "google_compute_instance" "default" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.name
+    network = "default"
     access_config {
       // Ephemeral IP
     }
   }
-
-  provisioner "local-exec" {
-    command = "echo ${google_compute_instance.vm_instance.name}:  ${google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip} >> ip_address.txt"
-  }
-}
-
-resource "google_compute_network" "vpc_network" {
-  name = "terraform-network"
 }
