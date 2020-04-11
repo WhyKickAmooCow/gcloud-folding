@@ -11,10 +11,17 @@ provider "google" {
 #
 # Setting up the instance for folding, and the network for remote access
 #
+resource "random_id" "instance_id" {
+  byte_length = 2
+  count       = var.machine_count
+}
+
 resource "google_compute_instance" "folding" {
-  name         = var.instance_name
+  name         = "${var.instance_prefix}-${random_id.instance_id.*.dec[count.index]}"
   machine_type = var.machine_type
   zone         = coalesce(var.compute_zone, var.default_zone)
+  count        = var.machine_count
+
 
   tags = ["folding"]
 
@@ -70,12 +77,12 @@ resource "google_compute_firewall" "folding_access" {
 }
 
 resource "google_compute_firewall" "ssh_access" {
-  name = "folding-allow-ssh"
+  name    = "folding-allow-ssh"
   network = google_compute_network.vpc_network.name
 
   allow {
     protocol = "tcp"
-    ports = ["22"]
+    ports    = ["22"]
   }
 }
 

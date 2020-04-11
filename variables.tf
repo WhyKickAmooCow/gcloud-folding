@@ -23,6 +23,8 @@ variable "machine_type" {
   default = "n1-highcpu-2"
 }
 
+variable "machine_count" {}
+
 variable "gpu_type" {}
 
 variable "gpu_count" {}
@@ -37,4 +39,4 @@ variable "shutdown_script_file" {
 
 variable "initial_image" {}
 
-variable "instance_name" {}
+variable "instance_prefix" {}
