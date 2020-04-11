@@ -67,7 +67,7 @@ resource "google_compute_firewall" "folding_access" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "36331", "0-65535"]
+    ports    = ["80", "443", "36331"]
   }
 }
 
