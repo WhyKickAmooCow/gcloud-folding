@@ -19,9 +19,7 @@ variable "compute_zone" {
   default = ""
 }
 
-variable "machine_type" {
-  default = "n1-highcpu-2"
-}
+variable "machine_type" {}
 
 variable "machine_count" {}
 
