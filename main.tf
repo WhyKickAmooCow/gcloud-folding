@@ -22,9 +22,6 @@ resource "google_compute_instance" "folding" {
   zone         = coalesce(var.compute_zone, var.default_zone)
   count        = var.machine_count
 
-
-  tags = ["folding"]
-
   scheduling {
     preemptible         = true
     automatic_restart   = false
@@ -72,8 +69,6 @@ resource "google_compute_firewall" "folding_access" {
     protocol = "tcp"
     ports    = ["80", "443", "36331", "0-65535"]
   }
-
-  source_tags = ["folding"]
 }
 
 resource "google_compute_firewall" "ssh_access" {
