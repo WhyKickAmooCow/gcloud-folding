@@ -1,3 +1,11 @@
+provider "archive" {
+  version = "~> 1.3"
+}
+
+provider "random" {
+  version = "~> 2.2"
+}
+
 provider "google" {
   version = "3.16.0"
 
@@ -14,6 +22,11 @@ provider "google" {
 resource "random_id" "instance_id" {
   byte_length = 2
   count       = var.machine_count
+}
+
+resource "google_compute_address" "static" {
+  name = "ipv4-address"
+  count = var.static_ip ? var.machine_count : 0
 }
 
 resource "google_compute_instance" "folding" {
@@ -52,7 +65,7 @@ resource "google_compute_instance" "folding" {
   network_interface {
     network = google_compute_network.vpc_network.name
     access_config {
-      // Ephemeral IP
+       nat_ip = var.static_ip ? google_compute_address.static[count.index].address : ""
     }
   }
 }

@@ -23,6 +23,11 @@ variable "machine_type" {}
 
 variable "machine_count" {}
 
+variable "static_ip" {
+  default = false
+}
+
+
 variable "gpu_type" {}
 
 variable "gpu_count" {}

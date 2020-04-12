@@ -7,5 +7,6 @@ initial_image    = "ubuntu-1804-bionic-v20200317"
 gpu_type         = "nvidia-tesla-p100"
 instance_prefix  = "folding"
 gpu_count        = 1 # GPUs per instance
-machine_type     = "n1-highcpu-2"
 machine_count    = 1 # Number of instances
+machine_type     = "n1-highcpu-2"
+# static_ip    = true # Use static ip addresses for all of the instances (at a cost of 1.46/month or 0.002 per hour)
