@@ -53,7 +53,7 @@ resource "google_compute_instance" "folding" {
   metadata = {
     startup-script  = file(var.startup_script_file)
     shutdown-script = file(var.shutdown_script_file)
-    user-data       = file("cloud-init.yml")
+    user-data       = file("./resources/cloud-init.yml")
   }
 
   boot_disk {
