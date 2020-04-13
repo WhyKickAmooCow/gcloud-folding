@@ -38,7 +38,6 @@ packages:
   - cuda
 package_reboot_if_required: true
 
-# Change FAHClient version here, because cloud-init instance metadata is broke on GCE :(
 runcmd:
-  - wget 'https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-64bit/v7.5/fahclient_7.5.1_amd64.deb'
-  - sudo dpkg -i --force-depends fahclient_7.5.1_amd64.deb
+  - wget 'https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-64bit/v${fah_version_major}.${fah_version_minor}/fahclient_${fah_version}_amd64.deb'
+  - sudo dpkg -i --force-depends fahclient_${fah_version}_amd64.deb

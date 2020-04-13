@@ -1,3 +1,8 @@
+locals {
+  fah_version_major = split(".", var.fah_version)[0]
+  fah_version_minor = split(".", var.fah_version)[1]
+}
+
 provider "archive" {
   version = "~> 1.3"
 }
@@ -25,8 +30,17 @@ resource "random_id" "instance_id" {
 }
 
 resource "google_compute_address" "static" {
-  name = "ipv4-address"
+  name  = "ipv4-address"
   count = var.static_ip ? var.machine_count : 0
+}
+
+data "template_file" "cloud_init" {
+  template = file("./resources/cloud-init.yml")
+  vars = {
+    fah_version       = var.fah_version
+    fah_version_major = local.fah_version_major
+    fah_version_minor = local.fah_version_minor
+  }
 }
 
 resource "google_compute_instance" "folding" {
@@ -53,7 +67,7 @@ resource "google_compute_instance" "folding" {
   metadata = {
     startup-script  = file(var.startup_script_file)
     shutdown-script = file(var.shutdown_script_file)
-    user-data       = file("./resources/cloud-init.yml")
+    user-data       = data.template_file.cloud_init.rendered
   }
 
   boot_disk {
@@ -65,7 +79,7 @@ resource "google_compute_instance" "folding" {
   network_interface {
     network = google_compute_network.vpc_network.name
     access_config {
-       nat_ip = var.static_ip ? google_compute_address.static[count.index].address : ""
+      nat_ip = var.static_ip ? google_compute_address.static[count.index].address : ""
     }
   }
 }

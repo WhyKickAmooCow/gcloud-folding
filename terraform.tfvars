@@ -9,4 +9,5 @@ instance_prefix  = "folding"
 gpu_count        = 1 # GPUs per instance
 machine_count    = 1 # Number of instances
 machine_type     = "n1-highcpu-2"
-# static_ip    = true # Use static ip addresses for all of the instances (at a cost of 1.46/month or 0.002 per hour)
+fah_version      = "7.5.1"
+# static_ip        = true # Use static ip addresses for all of the instances (at a cost of 1.46/month or 0.002 per hour)

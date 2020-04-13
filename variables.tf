@@ -12,7 +12,6 @@ variable "function_region" {
   default = ""
 }
 
-
 variable "default_zone" {}
 
 variable "compute_zone" {
@@ -43,3 +42,5 @@ variable "shutdown_script_file" {
 variable "initial_image" {}
 
 variable "instance_prefix" {}
+
+variable "fah_version" {}
