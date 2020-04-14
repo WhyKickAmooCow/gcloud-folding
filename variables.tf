@@ -41,6 +41,26 @@ variable "shutdown_script_file" {
 
 variable "initial_image" {}
 
-variable "instance_prefix" {}
+variable "instance_prefix" {
+  default = "folding"
+}
 
 variable "fah_version" {}
+
+variable "fah_username" {
+  default = "Anonymous"
+}
+
+variable "fah_passkey" {
+  default = ""
+}
+
+variable "fah_team" {
+  default = 0
+}
+
+variable "fah_access_ip" {
+  default = ""
+}
+
+variable "fah_access_password" {}

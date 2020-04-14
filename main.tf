@@ -34,9 +34,30 @@ resource "google_compute_address" "static" {
   count = var.static_ip ? var.machine_count : 0
 }
 
+data "template_file" "gpu_slots" {
+  template = file("./resources/gpu-slot.xml")
+  count = var.gpu_count
+  vars = {
+    slot_id = count.index+1
+  }
+}
+
+data "template_file" "fah_config" {
+  template = file("./resources/fah-config.xml")
+  vars = {
+    fah_access_ip       = var.fah_access_ip
+    fah_access_password = var.fah_access_password
+    fah_username        = var.fah_username
+    fah_passkey         = var.fah_passkey
+    fah_team            = var.fah_team
+    gpu_slots           = join("\n  ", data.template_file.gpu_slots[*].rendered)
+  }
+}
+
 data "template_file" "cloud_init" {
   template = file("./resources/cloud-init.yml")
   vars = {
+    fah_config        = data.template_file.fah_config.rendered
     fah_version       = var.fah_version
     fah_version_major = local.fah_version_major
     fah_version_minor = local.fah_version_minor
@@ -68,6 +89,7 @@ resource "google_compute_instance" "folding" {
     startup-script  = file(var.startup_script_file)
     shutdown-script = file(var.shutdown_script_file)
     user-data       = data.template_file.cloud_init.rendered
+    fah-config      = data.template_file.fah_config.rendered
   }
 
   boot_disk {

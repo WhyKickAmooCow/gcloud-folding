@@ -1,0 +1,18 @@
+<config>
+  <allow v='127.0.0.1 ${fah_access_ip}'/>
+  <command-port v='36331'/>
+  <password v='${fah_access_password}'/>
+  <!-- Client Control -->
+  <fold-anon v='true'/>
+  <!-- Folding Slot Configuration -->
+  <gpu v='true'/>
+  <!-- Slot Control -->
+  <power v='full'/>
+  <!-- User Information -->
+  <passkey v='${fah_passkey}'/>
+  <team v='${fah_team}'/>
+  <user v='${fah_username}'/>
+  <!-- Folding Slots -->
+  <slot id='0' type='CPU'/>
+  ${gpu_slots}
+</config>

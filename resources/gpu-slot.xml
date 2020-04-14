@@ -1,0 +1,1 @@
+<slot id='${slot_id}' type='GPU'/>
