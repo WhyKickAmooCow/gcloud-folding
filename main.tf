@@ -34,8 +34,8 @@ resource "random_id" "instance_id" {
 }
 
 resource "random_password" "fah_access_password" {
-  length = 16
-  special = true
+  length           = 16
+  special          = true
   override_special = "_%@"
 }
 
@@ -128,7 +128,7 @@ resource "google_compute_firewall" "folding_access" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "36331"]
+    ports    = ["80", "443", var.fah_access_port]
   }
 }
 
