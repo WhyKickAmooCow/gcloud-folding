@@ -33,6 +33,13 @@ resource "random_id" "instance_id" {
   count       = var.machine_count
 }
 
+resource "random_password" "fah_access_password" {
+  length = 16
+  special = true
+  override_special = "_%@"
+}
+
+
 resource "google_compute_address" "static" {
   name  = "ipv4-address"
   count = var.static_ip ? var.machine_count : 0
@@ -51,7 +58,7 @@ data "template_file" "fah_config" {
   vars = {
     fah_access_port     = var.fah_access_port
     fah_access_ip       = var.fah_access_ip
-    fah_access_password = var.fah_access_password
+    fah_access_password = coalesce(var.fah_access_password, random_password.fah_access_password.result)
     fah_username        = var.fah_username
     fah_passkey         = var.fah_passkey
     fah_team            = var.fah_team
