@@ -148,6 +148,7 @@ resource "google_cloud_scheduler_job" "start_preemtive_vm" {
   description = "Start any preemptive vms in case any have gone down"
   schedule    = "*/5 * * * *"
   region      = coalesce(var.app_region, var.default_region)
+  time_zone   = var.time_zone
 
   pubsub_target {
     # topic.id is the topic's full resource name.

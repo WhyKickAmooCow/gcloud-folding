@@ -68,3 +68,7 @@ variable "fah_access_ip" {
 }
 
 variable "fah_access_password" {}
+
+variable "time_zone" {
+  default = "UTC"
+}
