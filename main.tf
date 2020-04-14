@@ -11,6 +11,10 @@ provider "random" {
   version = "~> 2.2"
 }
 
+provider "template" {
+  version = "~> 2.1"
+}
+
 provider "google" {
   version = "3.16.0"
 
@@ -36,15 +40,16 @@ resource "google_compute_address" "static" {
 
 data "template_file" "gpu_slots" {
   template = file("./resources/gpu-slot.xml")
-  count = var.gpu_count
+  count    = var.gpu_count
   vars = {
-    slot_id = count.index+1
+    slot_id = count.index + 1
   }
 }
 
 data "template_file" "fah_config" {
   template = file("./resources/fah-config.xml")
   vars = {
+    fah_access_port     = var.fah_access_port
     fah_access_ip       = var.fah_access_ip
     fah_access_password = var.fah_access_password
     fah_username        = var.fah_username

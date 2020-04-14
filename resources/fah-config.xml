@@ -1,6 +1,6 @@
 <config>
   <allow v='127.0.0.1 ${fah_access_ip}'/>
-  <command-port v='36331'/>
+  <command-port v='${fah_access_port}'/>
   <password v='${fah_access_password}'/>
   <!-- Client Control -->
   <fold-anon v='true'/>

@@ -59,6 +59,10 @@ variable "fah_team" {
   default = 0
 }
 
+variable "fah_access_port" {
+  default = 36331
+}
+
 variable "fah_access_ip" {
   default = ""
 }
