@@ -1,7 +1,13 @@
-output "instance_ips" {
-  value = google_compute_instance.folding[*].network_interface[0].access_config[0].nat_ip
+output "fah_instance_ips" {
+  description = "IP addresses of all instance with Folding at Home installed"
+  value       = concat(module.fah_instance.instance_ips, module.fah_boinc_instance.instance_ips)
 }
 
-output "fah_access_password" {
+output "boinc_instance_ips" {
+  description = "IP addresses of all instance with BOINC installed"
+  value       = concat(module.boinc_instance.instance_ips, module.fah_boinc_instance.instance_ips)
+}
+
+output "remote_access_password" {
   value = data.template_file.fah_config.vars.fah_access_password
 }

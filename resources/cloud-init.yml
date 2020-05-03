@@ -36,10 +36,20 @@ apt:
 
 packages:
   - cuda
+  ${ boinc ? "- boinc-client" : ""}
 package_reboot_if_required: true
 
 runcmd:
+${ boinc ? <<EOF
+  - curl -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/attributes/boinc-remote-hosts > /var/lib/boinc/remote_hosts.cfg
+  - curl -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/attributes/boinc-access-password > /var/lib/boinc/gui_rpc_auth.cfg
+  - systemctl restart boinc-client
+  EOF
+: "" }
+${ fah ? <<EOF
   - mkdir /etc/fahclient
   - curl -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/attributes/fah-config > /etc/fahclient/config.xml
   - wget 'https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-64bit/v${fah_version_major}.${fah_version_minor}/fahclient_${fah_version}_amd64.deb'
   - DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true dpkg -i --force-depends ./fahclient_${fah_version}_amd64.deb
+  EOF
+: "" }

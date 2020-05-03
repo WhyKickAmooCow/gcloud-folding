@@ -1,8 +1,3 @@
-locals {
-  fah_version_major = split(".", var.fah_version)[0]
-  fah_version_minor = split(".", var.fah_version)[1]
-}
-
 provider "archive" {
   version = "~> 1.3"
 }
@@ -25,24 +20,72 @@ provider "google" {
   zone    = var.default_zone
 }
 
-#
-# Setting up the instance for folding, and the network for remote access
-#
-resource "random_id" "instance_id" {
-  byte_length = 2
-  count       = var.machine_count
-}
+locals {
+  compute_zone = coalesce(var.compute_zone, var.default_zone)
 
-resource "random_password" "fah_access_password" {
-  length           = 16
-  special          = true
-  override_special = "_%@"
-}
+  fah_version_major      = split(".", var.fah_version)[0]
+  fah_version_minor      = split(".", var.fah_version)[1]
+  remote_access_password = coalesce(var.remote_access_password, random_password.remote_access_password.result)
 
+  boinc_metadata = {
+    startup-script = templatefile(var.startup_script_file, {
+      boic = true
+      fah  = false
+    })
+    shutdown-script = templatefile(var.shutdown_script_file, {
+      boinc = true
+      fah   = false
+    })
+    user-data = templatefile("./resources/cloud-init.yml", {
+      boinc             = true
+      fah               = false
+      fah_version       = var.fah_version
+      fah_version_major = local.fah_version_major
+      fah_version_minor = local.fah_version_minor
+    })
+    boinc-remote-hosts    = join("\n", split(" ", var.remote_access_ip))
+    boinc-access-password = local.remote_access_password
+  }
 
-resource "google_compute_address" "static" {
-  name  = "ipv4-address"
-  count = var.static_ip ? var.machine_count : 0
+  fah_metadata = {
+    startup-script = templatefile(var.startup_script_file, {
+      boinc = false
+      fah   = true
+    })
+    shutdown-script = templatefile(var.shutdown_script_file, {
+      boinc = false
+      fah   = true
+    })
+    user-data = templatefile("./resources/cloud-init.yml", {
+      boinc             = false
+      fah               = true
+      fah_version       = var.fah_version
+      fah_version_major = local.fah_version_major
+      fah_version_minor = local.fah_version_minor
+    })
+    fah-config = data.template_file.fah_config.rendered
+  }
+
+  fah_boinc_metadata = {
+    startup-script = templatefile(var.startup_script_file, {
+      boinc = true
+      fah   = true
+    })
+    shutdown-script = templatefile(var.shutdown_script_file, {
+      boinc = true
+      fah   = true
+    })
+    user-data = templatefile("./resources/cloud-init.yml", {
+      boinc             = true
+      fah               = true
+      fah_version       = var.fah_version
+      fah_version_major = local.fah_version_major
+      fah_version_minor = local.fah_version_minor
+    })
+    fah-config            = data.template_file.fah_config.rendered
+    boinc-remote-hosts    = join("\n", split(" ", var.remote_access_ip))
+    boinc-access-password = local.remote_access_password
+  }
 }
 
 data "template_file" "gpu_slots" {
@@ -57,8 +100,8 @@ data "template_file" "fah_config" {
   template = file("./resources/fah-config.xml")
   vars = {
     fah_access_port     = var.fah_access_port
-    fah_access_ip       = var.fah_access_ip
-    fah_access_password = coalesce(var.fah_access_password, random_password.fah_access_password.result)
+    fah_access_ip       = var.remote_access_ip
+    fah_access_password = local.remote_access_password
     fah_username        = var.fah_username
     fah_passkey         = var.fah_passkey
     fah_team            = var.fah_team
@@ -66,61 +109,61 @@ data "template_file" "fah_config" {
   }
 }
 
-data "template_file" "cloud_init" {
-  template = file("./resources/cloud-init.yml")
-  vars = {
-    fah_config        = data.template_file.fah_config.rendered
-    fah_version       = var.fah_version
-    fah_version_major = local.fah_version_major
-    fah_version_minor = local.fah_version_minor
-  }
+resource "random_password" "remote_access_password" {
+  length           = 16
+  special          = true
+  override_special = "_%@"
 }
 
-resource "google_compute_instance" "folding" {
-  name         = "${var.instance_prefix}-${random_id.instance_id.*.dec[count.index]}"
-  machine_type = var.machine_type
-  zone         = coalesce(var.compute_zone, var.default_zone)
-  count        = var.machine_count
+module "boinc_instance" {
+  source = "./modules/instance"
 
-  scheduling {
-    preemptible         = true
-    automatic_restart   = false
-    on_host_maintenance = "TERMINATE"
-  }
+  network         = google_compute_network.vpc_network.name
+  static_ip       = var.static_ip
+  metadata        = local.boinc_metadata
+  instance_prefix = "boinc"
+  machine_type    = var.machine_type
+  machine_count   = var.boinc_machine_count
+  zone            = local.compute_zone
+  gpu_type        = var.gpu_type
+  gpu_count       = var.gpu_count
+  initial_image   = var.initial_image
+}
 
-  guest_accelerator {
-    type  = var.gpu_type
-    count = var.gpu_count
-  }
+module "fah_instance" {
+  source = "./modules/instance"
 
-  labels = {
-    type = "preempt"
-  }
+  network         = google_compute_network.vpc_network.name
+  static_ip       = var.static_ip
+  metadata        = local.fah_metadata
+  instance_prefix = "folding"
+  machine_type    = var.machine_type
+  machine_count   = var.fah_machine_count
+  zone            = local.compute_zone
+  gpu_type        = var.gpu_type
+  gpu_count       = var.gpu_count
+  initial_image   = var.initial_image
+}
 
-  metadata = {
-    startup-script  = file(var.startup_script_file)
-    shutdown-script = file(var.shutdown_script_file)
-    user-data       = data.template_file.cloud_init.rendered
-    fah-config      = data.template_file.fah_config.rendered
-  }
+module "fah_boinc_instance" {
+  source = "./modules/instance"
 
-  boot_disk {
-    initialize_params {
-      image = var.initial_image
-    }
-  }
-
-  network_interface {
-    network = google_compute_network.vpc_network.name
-    access_config {
-      nat_ip = var.static_ip ? google_compute_address.static[count.index].address : ""
-    }
-  }
+  network         = google_compute_network.vpc_network.name
+  static_ip       = var.static_ip
+  metadata        = local.fah_boinc_metadata
+  instance_prefix = "fah-boinc"
+  machine_type    = var.machine_type
+  machine_count   = var.fah_boinc_machine_count
+  zone            = local.compute_zone
+  gpu_type        = var.gpu_type
+  gpu_count       = var.gpu_count
+  initial_image   = var.initial_image
 }
 
 resource "google_compute_firewall" "folding_access" {
   name    = "folding-remote-access"
   network = google_compute_network.vpc_network.name
+  count   = var.fah_machine_count > 0 || var.fah_boinc_machine_count > 0 ? 1 : 0
 
   allow {
     protocol = "icmp"
@@ -129,6 +172,17 @@ resource "google_compute_firewall" "folding_access" {
   allow {
     protocol = "tcp"
     ports    = ["80", "443", var.fah_access_port]
+  }
+}
+
+resource "google_compute_firewall" "boinc_access" {
+  name    = "boinc-remote-access"
+  network = google_compute_network.vpc_network.name
+  count   = var.boinc_machine_count > 0 || var.fah_boinc_machine_count > 0 ? 1 : 0
+
+  allow {
+    protocol = "tcp"
+    ports    = ["31416"]
   }
 }
 

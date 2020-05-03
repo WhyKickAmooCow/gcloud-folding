@@ -1,0 +1,10 @@
+variable "network" {}
+variable "static_ip" {}
+variable "metadata" {}
+variable "instance_prefix" {}
+variable "machine_type" {}
+variable "machine_count" {}
+variable "zone" {}
+variable "gpu_type" {}
+variable "gpu_count" {}
+variable "initial_image" {}

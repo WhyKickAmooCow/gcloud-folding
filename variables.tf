@@ -20,7 +20,12 @@ variable "compute_zone" {
 
 variable "machine_type" {}
 
-variable "machine_count" {}
+variable "boinc_machine_count" {}
+
+variable "fah_machine_count" {}
+
+variable "fah_boinc_machine_count" {}
+
 
 variable "static_ip" {
   default = false
@@ -63,11 +68,11 @@ variable "fah_access_port" {
   default = 36331
 }
 
-variable "fah_access_ip" {
+variable "remote_access_ip" {
   default = ""
 }
 
-variable "fah_access_password" {
+variable "remote_access_password" {
   default = ""
 }
 
