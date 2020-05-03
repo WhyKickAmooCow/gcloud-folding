@@ -186,7 +186,7 @@ resource "google_cloudfunctions_function" "start_vm" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name = "folding-bucket"
+  name = "${var.project}-folding-bucket"
 }
 
 resource "google_storage_bucket_object" "start_vm_function_archive" {
